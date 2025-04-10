@@ -1,0 +1,183 @@
+{% extends "global/Page.html" %}
+
+{% block content %}
+<div class="allocation-container">
+    <h1 class="main-title">
+        {% if current_part == 2 %}
+            Welcome to Part 2: Delegation (Mandatory)
+        {% elif current_part == 3 %}
+            Welcome to Part 3: Delegation (Optional)
+        {% endif %}
+    </h1>
+
+    <p class="intro-text">
+        {% if current_part == 2 %}
+            In this part, you will specify how much the AI agent should allocate to the Receiver in each round. The AI agent will follow these instructions for all 10 rounds in this part. Delegation is mandatory for Part 2.
+        {% elif current_part == 3 %}
+            In this part, you have chosen to delegate your decisions to an AI agent. Please specify how much the AI agent should allocate to the Receiver in each round. The AI agent will follow these instructions for all 10 rounds in this part.
+        {% endif %}
+    </p>
+
+    <p class="instructions">
+        Please complete the table below to set the allocation amounts. Each amount must be between <strong>0 and 100 points</strong>.
+    </p>
+
+    <form method="post" class="allocation-form">
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Round</th>
+                    <th>Amount to Allocate to Receiver (0-100 points)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in range(1, 11) %}
+                <tr>
+                    <td>Round {{ i }}</td>
+                    <td>
+                        <input
+                            type="number"
+                            name="{% if current_part == 2 %}agent_allocation_mandatory_round_{{ i }}{% elif current_part == 3 %}agent_allocation_optional_round_{{ i }}{% endif %}"
+                            min="0"
+                            max="100"
+                            step="1"
+                            required
+                            class="input-number">
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p class="confirmation-text">
+            Once you confirm, your allocations will be final, and the AI agent will use these instructions during the rounds.
+        </p>
+        <button type="submit" class="modern-btn">Confirm</button>
+    </form>
+</div>
+
+<style>
+/* General Styling */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Container Styling */
+.allocation-container {
+    max-width: 800px;
+    margin: 50px auto;
+    background: #ffffff;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+/* Title Styling */
+.main-title {
+    font-size: 28px;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333333;
+    font-weight: bold;
+    border-bottom: 3px solid #0056b3; /* Bottom border color */
+    padding-bottom: 10px;
+}
+
+/* Text Styling */
+.intro-text, .instructions, .confirmation-text {
+    font-size: 16px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #555555;
+}
+
+/* Table Styling */
+.styled-table {
+    border-collapse: collapse;
+    margin: 25px auto;
+    font-size: 15px;
+    font-family: Arial, sans-serif;
+    width: 100%;
+    text-align: center;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.styled-table thead tr {
+    background-color: #0056b3;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.styled-table th, .styled-table td {
+    border: 1px solid #dddddd;
+    padding: 10px 15px;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Input Styling */
+.input-number {
+    width: 80%;
+    padding: 10px;
+    font-size: 15px;
+    border: 1px solid #dddddd;
+    border-radius: 4px;
+    text-align: center;
+}
+
+/* Button Styling */
+.modern-btn {
+    display: block;
+    width: 100%;
+    max-width: 200px;
+    margin: 20px auto;
+    padding: 12px 20px;
+    font-size: 18px;
+    color: #ffffff;
+    background-color: #0056b3; /* Button background color */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-align: center;
+}
+
+.modern-btn:hover {
+    background-color: #003d80; /* Darker on hover */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .allocation-container {
+        padding: 20px;
+    }
+
+    .main-title {
+        font-size: 24px;
+    }
+
+    .intro-text, .instructions, .confirmation-text {
+        font-size: 14px;
+    }
+
+    .styled-table {
+        font-size: 14px;
+    }
+
+    .input-number {
+        width: 90%;
+    }
+}
+</style>
+{% endblock %}
