@@ -1,5 +1,6 @@
 from otree.api import *
 from .models import Constants
+import json
 
 
 # -----------------------------
@@ -114,20 +115,51 @@ class AgentProgramming(Page):
 
     def before_next_page(self):
         current_part = Constants.get_part(self.round_number)
-        if current_part in [2, 3]:
-            part_rounds = self.player.in_rounds(
-                (current_part - 1) * Constants.rounds_per_part + 1,
-                current_part * Constants.rounds_per_part
-            )
-            for round_num in range(1, 11):
-                allocation_field = (
-                    f"agent_allocation_mandatory_round_{round_num}"
-                    if current_part == 2
-                    else f"agent_allocation_optional_round_{round_num}"
-                )
-                allocation_value = getattr(self.player, allocation_field)
-                for p in part_rounds:
-                    setattr(p, allocation_field, allocation_value)
+        # if current_part in [2, 3]:
+        #     part_rounds = self.player.in_rounds(
+        #         (current_part - 1) * Constants.rounds_per_part + 1,
+        #         current_part * Constants.rounds_per_part
+        #     )
+        #     for round_num in range(1, 11):
+        #         allocation_field = (
+        #             f"agent_allocation_mandatory_round_{round_num}"
+        #             if current_part == 2
+        #             else f"agent_allocation_optional_round_{round_num}"
+        #         )
+        #         allocation_value = getattr(self.player, allocation_field)
+        #         for p in part_rounds:
+        #             setattr(p, allocation_field, allocation_value)
+        allocations = json.loads(self.player.agent_prog_allocation)
+
+        self.save_allocations_to_future_rounds(allocations)
+
+    def save_allocations_to_future_rounds(self, data):
+    
+        print(data)
+        try:
+            # ✅ Ensure we have exactly 10 allocations (Rounds 10 to 20)
+            if len(data) != 10:
+                raise ValueError("⚠️ Error: Expected 10 allocation values.")
+            round_number=self.round_number
+            print('Ongoing Round: ',round_number)
+            for i in range(1,11):  # ✅ Loop for 10 rounds (rounds 10-20)
+                # ✅ Fetch player object for the future round
+                future_player = self.player.in_round(round_number)
+                self.round_number=round_number
+
+                # ✅ Store allocation in the correct round
+                future_player.allocation = data[str(i)]
+                print(f"✅ Saved allocation {future_player.allocation} for Round {round_number}")
+                round_number = round_number + 1
+
+        except (ValueError, IndexError):
+            print("⚠️ Error:  response is not formatted correctly, skipping.")
+
+    def live_method(self,data):
+        print(f"Live method called with data: {data}")
+        self.agent_prog_allocation = data['allocations']
+
+
 
 
 # -------------------------
@@ -142,7 +174,7 @@ class Decision(Page):
 
     def is_displayed(self):
         current_part = Constants.get_part(self.round_number)
-        return True
+        return current_part == 1 or (current_part == 3 and not self.player.delegate_decision_optional)
 
     def vars_for_template(self):
         current_part = Constants.get_part(self.round_number)
@@ -183,10 +215,13 @@ class Decision(Page):
                     f"You did not make a choice, so {self.player.allocation} was chosen for you. "
                 )
                 self.player.random_decisions = True
+            
             else:
                 # Clear the alert message if no timeout occurred
                 self.participant.vars['alert_message'] = None
                 self.player.random_decisions = False
+            self.player.delegate_decision_optional = False 
+
             # Update decisions for the current round
 
 
@@ -195,12 +230,19 @@ class Decision(Page):
             self.player.allocation = self.player.get_agent_decision_mandatory(display_round)
             self.participant.vars['alert_message'] = ""
             self.player.random_decisions = True
+            self.player.delegate_decision_optional = False 
 
         elif current_part == 3 and self.player.delegate_decision_optional:  # Optional delegation
             self.player.allocation = self.player.get_agent_decision_optional(display_round)
             self.participant.vars['alert_message'] = ""
             self.player.random_decisions = False
+            self.player.delegate_decision_optional = True
 
+        elif current_part == 3 and not self.player.delegate_decision_optional:  # Manual decision
+
+            #self.player.allocation = self.player.get_agent_decision_optional(display_round)
+            self.player.random_decisions = False
+            self.player.delegate_decision_optional = False
 
 
         print(f"round:{self.round_number}  self.player.allocation: {self.player.allocation}")
@@ -242,6 +284,10 @@ class Results(Page):
         import json
 
         current_part = Constants.get_part(self.round_number)
+        if current_part  == 2 or (current_part == 3 and self.player.delegate_decision_optional):
+            is_delegation=False
+        else: 
+            is_delegation=  self.player.field_maybe_none('delegate_decision_optional')
         #decisions = json.loads(self.player.random_decisions)
 
         # Collect results for each round in the current part
@@ -253,7 +299,7 @@ class Results(Page):
             for player in self.subsession.get_players():
                 round_result = player.in_round(round_number)
                 rounds_data.append({
-                    "round": round_number,
+                    "round": round_number if current_part ==1 else round_number - 10 if current_part == 2 else round_number - 20,
                     "decision": round_result.random_decisions,
                     "id_in_group": player.id_in_group,
                     "kept": 100 - (round_result.allocation or 0),
@@ -264,6 +310,7 @@ class Results(Page):
         return {
             'current_part': current_part,
             'rounds_data': rounds_data,
+            'is_delegation': is_delegation,
 
             #'decisions': decisions,
         }
@@ -308,11 +355,12 @@ class Results(Page):
 
 class Debriefing(Page):
     def is_displayed(self):
-        return not self.player.is_excluded and self.round_number == Constants.num_rounds
+        return  self.round_number == Constants.num_rounds
 
 
     def vars_for_template(self):
         import json
+
 
         results_by_part = {}
 
@@ -326,20 +374,49 @@ class Debriefing(Page):
                 round_result = self.player.in_round(round_number)
                 part_data.append({
                     "round": round_number,
-                    "kept": 100 - (round_result.allocation or 0),
-                    "allocated": round_result.allocation or 0,
-                    "decision" : round_result.random_decisions,
+                    "kept": 100 - (round_result.field_maybe_none('allocation') or 0),
+                    "allocated": round_result.field_maybe_none('allocation')or 0,
+                    "decision" : round_result.field_maybe_none('random_decisions'),
                 })
 
             results_by_part[part] = part_data
 
         # Check if agent allocation was chosen in part 3
-        agent_allocation_chosen = self.player.delegate_decision_optional
+        agent_allocation_chosen = self.player.field_maybe_none('delegate_decision_optional')
+        if self.player.field_maybe_none('random_payoff_part') == None: 
+            random_payoff_part=self.random_payoff_selection()
+            self.player.random_payoff_part=random_payoff_part
+        else: 
+            random_payoff_part=self.player.random_payoff_part
+
+        payoff_data=results_by_part[self.player.random_payoff_part]
+        total_kept,total_allocated=self.calculate_total_payoff(payoff_data)
 
         return {
             'results_by_part': results_by_part,
             'agent_allocation_chosen': agent_allocation_chosen,
-        }
+            'random_payoff_part': random_payoff_part,
+            'total_kept' : total_kept,
+            'payoff_cents' : int(round(total_kept/10,0)),
+            'total_allocated' : total_allocated
+               }
+    
+
+    def random_payoff_selection(self): 
+        import random
+
+        round_number=self.round_number
+        random_payoff_part=random.randint(1,3)
+        return random_payoff_part
+
+    def calculate_total_payoff(self, part_data): 
+        total_kept=0
+        total_allocated=0
+        for round in part_data: 
+                total_kept=total_kept+round["kept"]
+                total_allocated=total_allocated+round["allocated"]
+        
+        return total_kept,total_allocated
 
 
 # -------------------------

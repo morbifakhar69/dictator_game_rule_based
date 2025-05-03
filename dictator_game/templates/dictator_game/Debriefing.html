@@ -3,23 +3,15 @@
 {% block content %}
 <div class="modern-container">
     <h1 class="main-title">Debriefing</h1>
-    <p>Thank you for participating in this study! Here are your results:</p>
+    <p>Part {% random_payoff_part %} has been randomly chosen for the payoff and has been highlighted for you. </p>
+    <p class='summary-note' style=" font-weight: bold;"> According to this, you are entitield to a total bonus payments of {% total_kept %} Ecoins = {% payoff_cents %} cents.</p>
 
     <div class="tables-container">
         {% for part, part_data in results_by_part.items %}
-        <div class="table-wrapper">
+        <div class="table-wrapper {% if part == random_payoff_part %}highlight-payoff{% endif %}">
             <div class="table-header">
                 <h4 class="table-title">
-                    Part {{ part }}:
-                    {% if part == 1 %}Player Allocation{% endif %}
-                    {% if part == 2 %}Agent Allocation{% endif %}
-                    {% if part == 3 %}
-                        {% if agent_allocation_chosen %}
-                            Agent Allocation
-                        {% else %}
-                            Player Allocation
-                        {% endif %}
-                    {% endif %}
+                    Part {{ part }}
                 </h4>
             </div>
 
@@ -44,7 +36,6 @@
         </div>
         {% endfor %}
     </div>
-
     <p class="summary-note">
         Your total allocation decisions have been recorded. Please contact the researcher if you have any questions.
     </p>
@@ -52,6 +43,13 @@
 
 <style>
 /* General Styling */
+
+.highlight-payoff {
+    border: 3px solid #ff9800; /* Orange border to highlight */
+    box-shadow: 0 0 15px rgba(255, 152, 0, 0.5);
+}
+
+
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;

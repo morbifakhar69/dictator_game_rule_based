@@ -41,10 +41,12 @@ class Player(BasePlayer):
     )
 
     random_decisions = models.BooleanField(blank=True)
+    random_payoff_part=models.IntegerField( blank=True, min=1, max=3 )
+
     # Tracks the number of failed comprehension attempts
     comprehension_attempts = models.IntegerField(initial=0) #new
     incorrect_answers = models.StringField(blank=True) #new
-
+    agent_prog_allocation=models.StringField(initial='[]') #new
     # Tracks whether the participant is excluded from the study
     is_excluded = models.BooleanField(initial=False)
 

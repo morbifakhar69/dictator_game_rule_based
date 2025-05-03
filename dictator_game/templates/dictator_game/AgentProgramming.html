@@ -4,40 +4,37 @@
 <div class="allocation-container">
     <h1 class="main-title">
         {% if current_part == 2 %}
-            Welcome to Part 2: Delegation (Mandatory)
+            Part 2: Set up your AI agent
         {% elif current_part == 3 %}
             Welcome to Part 3: Delegation (Optional)
         {% endif %}
     </h1>
-
+ 
     <p class="intro-text">
         {% if current_part == 2 %}
-            In this part, you will specify how much the AI agent should allocate to the Receiver in each round. The AI agent will follow these instructions for all 10 rounds in this part. Delegation is mandatory for Part 2.
+        Fill in the table below to specify how your AI agent should make allocations from your endowment of 100 ECoins to each different human Receiver that it will encounter in each round. Each amount should be between <strong>0 and 100 ECoins</strong>.
         {% elif current_part == 3 %}
             In this part, you have chosen to delegate your decisions to an AI agent. Please specify how much the AI agent should allocate to the Receiver in each round. The AI agent will follow these instructions for all 10 rounds in this part.
         {% endif %}
     </p>
 
-    <p class="instructions">
-        Please complete the table below to set the allocation amounts. Each amount must be between <strong>0 and 100 points</strong>.
-    </p>
 
     <form method="post" class="allocation-form">
         <table class="styled-table">
             <thead>
                 <tr>
                     <th>Round</th>
-                    <th>Amount to Allocate to Receiver (0-100 points)</th>
+                    <th>Allocations</th>
                 </tr>
             </thead>
             <tbody>
                 {% for i in range(1, 11) %}
                 <tr>
-                    <td>Round {{ i }}</td>
+                    <td>{{ i }}</td>
                     <td>
                         <input
                             type="number"
-                            name="{% if current_part == 2 %}agent_allocation_mandatory_round_{{ i }}{% elif current_part == 3 %}agent_allocation_optional_round_{{ i }}{% endif %}"
+                            name="{{i}}"
                             min="0"
                             max="100"
                             step="1"
@@ -51,9 +48,32 @@
         <p class="confirmation-text">
             Once you confirm, your allocations will be final, and the AI agent will use these instructions during the rounds.
         </p>
-        <button type="submit" class="modern-btn">Confirm</button>
+        <button type="submit" class="modern-btn" onclick="sendAllocations()">Confirm</button>
     </form>
 </div>
+
+
+<script>
+
+    function Sleep(milliseconds) {
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
+    }
+
+    function sendAllocations() {
+        
+        let allocationData = {}
+        // Select all input elements in the form
+        document.querySelectorAll('.input-number').forEach(input => {
+            allocationData[input.name]=parseInt(input.value, 10);
+        });
+        console.log('Values from table:', allocationData);
+        
+
+        // Send the data via liveSend
+        liveSend({ 'allocations': JSON.stringify(allocationData) });
+    }
+</script>
+
 
 <style>
 /* General Styling */
