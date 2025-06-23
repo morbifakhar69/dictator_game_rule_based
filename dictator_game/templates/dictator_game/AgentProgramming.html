@@ -5,8 +5,8 @@
     <h1 class="main-title">
         {% if current_part == 2 %}
             Part 2: Set up your AI agent
-        {% elif current_part == 3 %}
-            Welcome to Part 3: Delegation (Optional)
+        {% elif current_part == 3 and delegate_decision == True %}
+            Part 3: Set up your AI agent
         {% endif %}
     </h1>
  
@@ -116,7 +116,7 @@ body {
 
 /* Table Styling */
 .styled-table {
-    border-collapse: collapse;
+    border-collapse: show;
     margin: 25px auto;
     font-size: 15px;
     font-family: Arial, sans-serif;
@@ -134,7 +134,7 @@ body {
 }
 
 .styled-table th, .styled-table td {
-    border: 1px solid #dddddd;
+    border: 1px solid #c1c1c1;
     padding: 10px 15px;
 }
 
@@ -151,7 +151,7 @@ body {
     width: 80%;
     padding: 10px;
     font-size: 15px;
-    border: 1px solid #dddddd;
+    border: 1px solid #c1c1c1;
     border-radius: 4px;
     text-align: center;
 }

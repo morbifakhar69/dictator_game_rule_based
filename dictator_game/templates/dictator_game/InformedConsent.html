@@ -125,12 +125,22 @@
         </div>
     </div>
 
+        <div class="content-section">
+                    <h2>Deception</h2>
+
+            <div class="content-box">
+            <p>
+            </p>
+A note on deception” that says, “There is NO DECEPTION in this economic experiment. You will be interacting with other real human participants, and depending on your role in the game, your decisions will affect the monetary gains of both you and the other participants you will be paired with.      
+        </div>
+    </div>
+
     <div class="content-section">
         <h2>Consent</h2>
         <div class="content-box">
             <p>
-                By clicking "I Agree," you confirm that:
             </p>
+            By providing your Prolific ID in the box below and clicking “I agree”, you confirm that:
             <ul>
                 <li>You have read and understood the information provided.</li>
                 <li>You meet the participation requirements.</li>
@@ -139,10 +149,45 @@
         </div>
     </div>
 
-    <form method="post" class="form-container">
-        <button type="submit" class="modern-btn">I Agree</button>
-    </form>
+        <p id="error-msg" style="color: red; display: none;"></p>
+
+        <!-- Use an ID for the form and bind JS separately -->
+        <form method="post" id="consent-form">
+        <label for="prolific-id"><strong>My Prolific ID is:</strong></label><br>
+            {{ form.prolific_id }}
+            <br><br>
+            <button type="submit" class="modern-btn" id="agree-btn">I agree</button>
+        </form>
+        </form>
 </div>
+
+<script>
+  
+        form.addEventListener('submit', function (event) {
+            // Always prevent default first
+            console.log('Checking ID')
+            const form = document.getElementById('consent-form');
+            const input = document.querySelector('input[name="prolific_id"]');
+            const error = document.getElementById("error-msg");
+
+
+            const val = input.value.trim();
+            const isValid = /^[A-Za-z0-9]{24}$/.test(val);
+
+            if (!isValid) {
+                event.preventDefault(); 
+                console.log('ID not valid')
+                error.style.display = "block";
+                error.textContent = "Please make sure that your Prolific ID is correct. You will not be able to proceed in the experiment without providing your Prolific ID.";
+            } else {
+                error.style.display = "none";
+                console.log('ID is valid')
+
+                // ✅ Submit manually if valid
+                form.submit();
+            }
+        });
+</script>
 
 <style>
 /* General Styling */

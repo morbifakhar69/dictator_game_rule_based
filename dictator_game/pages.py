@@ -8,8 +8,15 @@ import json
 # -----------------------------
 
 class InformedConsent(Page):
+    form_model = 'player'
+    form_fields = ['prolific_id']
     def is_displayed(self):
         return self.round_number == 1  # Show only once at the beginning
+    def error_message_prolific_id(self, value):
+        print('error check informed consesnte')
+        pid = value.get('prolific_id', '')
+        if len(value.strip()) != 24:
+            return "Please make sure that your Prolific ID is correct. You will not be able to proceed in the experiment without providing your Prolific ID."
 
 
 class Introduction(Page):
@@ -108,8 +115,10 @@ class AgentProgramming(Page):
     
     def vars_for_template(self):
         current_part = Constants.get_part(self.round_number)
+
         return {
-            'current_part': current_part
+            'current_part': current_part,
+            'delegate_decision': self.player.field_maybe_none('delegate_decision_optional')
         }
 
 
@@ -169,7 +178,7 @@ class AgentProgramming(Page):
 class Decision(Page):
     form_model = 'player'
     form_fields = ['allocation']
-    timeout_seconds = 20
+    #timeout_seconds = 20
 
 
     def is_displayed(self):
@@ -207,20 +216,11 @@ class Decision(Page):
         current_part = Constants.get_part(self.round_number)
         display_round = (self.round_number - 1) % Constants.rounds_per_part + 1
 
-        if current_part == 1  :  # Part 1 logic or Part 3 with manual with manual decisions and timer
-            if self.timeout_happened or self.player.allocation is None:
-                # Assign random allocation if timer expires
-                self.player.allocation = random.randint(0, 100)
-                self.participant.vars['alert_message'] = (
-                    f"You did not make a choice, so {self.player.allocation} was chosen for you. "
-                )
-                self.player.random_decisions = True
-            
-            else:
-                # Clear the alert message if no timeout occurred
+        if current_part == 1 or (current_part == 3 and not self.player.delegate_decision_optional)  :  # Part 1 logic or Part 3 with manual with manual decisions and timer
+  
                 self.participant.vars['alert_message'] = None
                 self.player.random_decisions = False
-            self.player.delegate_decision_optional = False 
+                self.player.delegate_decision_optional = False 
 
             # Update decisions for the current round
 
@@ -238,11 +238,13 @@ class Decision(Page):
             self.player.random_decisions = False
             self.player.delegate_decision_optional = True
 
-        elif current_part == 3 and not self.player.delegate_decision_optional:  # Manual decision
+        # elif current_part == 3 and not self.player.delegate_decision_optional:  # Manual decision
 
-            #self.player.allocation = self.player.get_agent_decision_optional(display_round)
-            self.player.random_decisions = False
-            self.player.delegate_decision_optional = False
+        #     #self.player.allocation = self.player.get_agent_decision_optional(display_round)
+        #     self.player.random_decisions = False
+        #     self.player.delegate_decision_optional = False
+        #     self.player.allocation = self.player.get_agent_decision_optional(display_round)
+
 
 
         print(f"round:{self.round_number}  self.player.allocation: {self.player.allocation}")
@@ -360,9 +362,13 @@ class Debriefing(Page):
 
     def vars_for_template(self):
         import json
-
+        import random
 
         results_by_part = {}
+        totals_by_part= {}
+
+        round_number=self.round_number
+        random_payoff_part=random.randint(1,3)
 
         # Loop through parts (1, 2, 3)
         for part in range(1, 4):
@@ -380,6 +386,12 @@ class Debriefing(Page):
                 })
 
             results_by_part[part] = part_data
+            total_kept = sum(item["kept"] for item in part_data)
+            total_allocated = sum(item["allocated"] for item in part_data)
+            totals_by_part[part] = {
+            "total_kept": total_kept,
+        }
+
 
         # Check if agent allocation was chosen in part 3
         agent_allocation_chosen = self.player.field_maybe_none('delegate_decision_optional')
@@ -389,15 +401,23 @@ class Debriefing(Page):
         else: 
             random_payoff_part=self.player.random_payoff_part
 
+        
+
         payoff_data=results_by_part[self.player.random_payoff_part]
         total_kept,total_allocated=self.calculate_total_payoff(payoff_data)
 
+
         return {
             'results_by_part': results_by_part,
+            'totals_by_part': totals_by_part,
+
+            'totals_by_1': totals_by_part[1]['total_kept'],
+            'totals_by_2': totals_by_part[2]['total_kept'],
+            'totals_by_3': totals_by_part[3]['total_kept'],
             'agent_allocation_chosen': agent_allocation_chosen,
             'random_payoff_part': random_payoff_part,
             'total_kept' : total_kept,
-            'payoff_cents' : int(round(total_kept/10,0)),
+            'payoff_cents' : int(round(total_kept/10,1)),
             'total_allocated' : total_allocated
                }
     

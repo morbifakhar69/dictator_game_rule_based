@@ -2,12 +2,7 @@
 
 {% block content %}
 <div class="modern-decision-container">
-    {% if alert_message  %}
-    <!-- Right-side banner alert -->
-    <div class="alert-banner">
-        {{ alert_message }}
-    </div>
-    {% endif %}
+
 
     <h1 class="main-title">Decision: Round {{ round_number }} of Part {{ current_part }}</h1>
     {% if decision_mode == "manual" %}
@@ -15,13 +10,7 @@
     <p class="int{% extends "global/Page.html" %}
 
     {% block content %}
-    <div class="modern-decision-container">
-        {% if alert_message  %}
-        <!-- Right-side banner alert -->
-        <div class="alert-banner">
-            {{ alert_message }}
-        </div>
-        {% endif %}
+
     
         <h1 class="main-title">Decision: Round {{ round_number }} of Part {{ current_part }}</h1>
         {% if decision_mode == "manual" %}

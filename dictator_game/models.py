@@ -39,7 +39,7 @@ class Player(BasePlayer):
         label="How much would you like to allocate to the other participant?",
         blank=True
     )
-
+    prolific_id = models.StringField()
     random_decisions = models.BooleanField(blank=True)
     random_payoff_part=models.IntegerField( blank=True, min=1, max=3 )
 
@@ -114,11 +114,14 @@ class Player(BasePlayer):
     agent_allocation_mandatory_round_9 = models.IntegerField(min=0, max=100, blank=True)
     agent_allocation_mandatory_round_10 = models.IntegerField(min=0, max=100, blank=True)
 
-    # Track whether the participant chooses to delegate in Part 3
+    #Track whether the participant chooses to delegate in Part 3
     delegate_decision_optional = models.BooleanField(
         label="Would you like to delegate your decisions to an AI agent for Part 3?",
-        blank=True
+        blank=False
     ) 
+
+
+
 
     # Agent allocations for Part 3 (optional delegation)
     agent_allocation_optional_round_1 = models.IntegerField(min=0, max=100, blank=True)

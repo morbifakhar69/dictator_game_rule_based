@@ -20,18 +20,18 @@
                     <th>Decision</th>
                     <th>Player</th>
                 -->
-                    <th>Kept</th>
-                    <th>Allocated</th>
-                    <th>Total</th>
+                    <th>Allocated <small>(to others)</small></th>
+                    <th>Kept <small>(to yourself)</small></th>
+
                 </tr>
             </thead>
             <tbody>
                 {% for result in rounds_data %}
                 <tr>
                     <td>{{ result.round }}</td>
+                     <td>{{ result.allocated }}</td>
+
                     <td>{{ result.kept }}</td>
-                    <td>{{ result.allocated }}</td>
-                    <td>{{ result.total }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -100,12 +100,12 @@
     
     .styled-table th,
     .styled-table td {
-        border: 1px solid #dddddd;
+        border: 1px solid #c1c1c1;
         padding: 12px 15px;
     }
     
     .styled-table tbody tr {
-        border-bottom: 1px solid #dddddd;
+        border-bottom: 1px solid #c1c1c1;
     }
     
     .styled-table tbody tr:nth-of-type(even) {
@@ -117,7 +117,7 @@
     }
     
     .styled-table tbody tr:last-of-type {
-        border-bottom: 2px solid #0056b3;
+        border-bottom: 2px solid #c1c1c1;
     }
     
     /* Button Styling */

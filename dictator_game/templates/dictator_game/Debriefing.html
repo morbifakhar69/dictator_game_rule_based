@@ -4,7 +4,7 @@
 <div class="modern-container">
     <h1 class="main-title">Debriefing</h1>
     <p>Part {% random_payoff_part %} has been randomly chosen for the payoff and has been highlighted for you. </p>
-    <p class='summary-note' style=" font-weight: bold;"> According to this, you are entitield to a total bonus payments of {% total_kept %} Ecoins = {% payoff_cents %} cents Where {% total_kept %} is substituted by the sum of all the ECoins kept within the part that was selected for the bonus payment</p>
+    <p class='summary-note' style=" font-weight: bold;"> According to this, you are entitield to a total bonus payments of {% total_kept %} Ecoins = {% payoff_cents %} cents.</p>
 
     <div class="tables-container">
         {% for part, part_data in results_by_part.items %}
@@ -33,6 +33,15 @@
                 {% endfor %}
                 </tbody>
             </table>
+                <br>
+                <div>{% if part == 1 %}
+                    <h5 class="table-title">Total Kept: </h5>  <p>{{totals_by_1}} ECoins</p>
+                {% elif part == 2 %}
+                    <h5 class="table-title">Total Kept: </h5>  <p>{{totals_by_2}} ECoins</p>
+                {% elif part == 3 %}
+                    <h5 class="table-title">Total Kept: </h5>  <p>{{totals_by_3}} ECoins</p>
+                {% endif %}
+                </div>
         </div>
         {% endfor %}
     </div>
