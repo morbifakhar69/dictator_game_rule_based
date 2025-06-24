@@ -39,14 +39,14 @@ DEMO_PAGE_INTRO_HTML = """ """
 SECRET_KEY = '9871076378040'
 
 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.postgresql',
-#        'NAME': 'otree_db',  # Your PostgreSQL database name
-#        'USER': 'postgres',  # Your PostgreSQL username
-#        'PASSWORD': 'qag869RAK',  # Your PostgreSQL password
-#        'HOST': 'localhost',  # Or the IP address of your PostgreSQL server
-#        'PORT': '5432',  # Default PostgreSQL port
-#    }
-#}
+DATABASES = {
+   'default': {
+       'ENGINE': 'django.db.backends.postgresql',
+       'NAME': 'otree_db',  # Your PostgreSQL database name
+       'USER': 'postgres',  # Your PostgreSQL username
+       'PASSWORD': 'qag869RAK',  # Your PostgreSQL password
+       'HOST': 'localhost',  # Or the IP address of your PostgreSQL server
+       'PORT': '5432',  # Default PostgreSQL port
+   }
+}
 
