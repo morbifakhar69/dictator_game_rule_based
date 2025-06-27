@@ -289,63 +289,28 @@ class Results(Page):
             is_delegation=  self.player.field_maybe_none('delegate_decision_optional')
         #decisions = json.loads(self.player.random_decisions)
 
-        # Collect results for each round in the current part
+        player  = self.player
         rounds_data = []
-        for round_number in range(
-            (current_part - 1) * Constants.rounds_per_part + 1,
-            current_part * Constants.rounds_per_part + 1
+
+        for r in range(
+                (current_part - 1) * Constants.rounds_per_part + 1,
+                current_part     * Constants.rounds_per_part + 1
         ):
-            for player in self.subsession.get_players():
-                round_result = player.in_round(round_number)
-                rounds_data.append({
-                    "round": round_number if current_part ==1 else round_number - 10 if current_part == 2 else round_number - 20,
-                    "decision": round_result.random_decisions,
-                    "id_in_group": player.id_in_group,
-                    "kept": 100 - (round_result.allocation or 0),
-                    "allocated": round_result.allocation or 0,
-                    "total": 100
-                })
+            rr         = player.in_round(r)
+            allocation = rr.field_maybe_none('allocation') or 0   # 0 if None
+            rounds_data.append({
+                'round'     : r - (current_part - 1) * Constants.rounds_per_part,
+                'kept'      : 100 - allocation,
+                'allocated' : allocation,
+                'total'     : 100,
+            })
 
-        return {
-            'current_part': current_part,
-            'rounds_data': rounds_data,
-            'is_delegation': is_delegation,
+        return dict(
+            current_part = current_part,
+            rounds_data  = rounds_data,
+            is_delegation = is_delegation,
+        )
 
-            #'decisions': decisions,
-        }
-
-        #this code is for random allocations
-        # import json
-        # current_part = Constants.get_part(self.round_number)
-        # display_round = (self.round_number - 1) % Constants.rounds_per_part + 1
-        # random_decisions = json.loads(self.player.random_decisions) if self.player.random_decisions else []
-        # for decision in random_decisions:
-        #     if decision.get("round") == self.round_number:
-        #         current_round_status = decision.get("status", "Not Set")
-        #         break
-        # part_data = self.player.in_rounds(
-        #     (current_part - 1) * Constants.rounds_per_part + 1,
-        #     self.round_number
-        # )
-        #
-        # rounds_data = [
-        #     {
-        #         'round_number': (player.round_number - 1) % Constants.rounds_per_part + 1,
-        #         'allocated': player.allocation or 0,
-        #         'kept': Constants.endowment - (player.allocation or 0),
-        #     }
-        #     for player in part_data
-        # ]
-        # print('Random Decisions: ',random_decisions)
-        #
-        # return {
-        #     'current_part': current_part,
-        #     'round_number': display_round,
-        #     'rounds_data': rounds_data,
-        #     'current_round_random': current_round_status,
-        #     'all_random_decisions': random_decisions,  # All decisions for debugging
-        #
-        # }
 
 
 # -------------------------
